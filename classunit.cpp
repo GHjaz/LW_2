@@ -1,4 +1,4 @@
 #include "classunit.h"
 
-const std::vector< std::string > ClassUnit::ACCESS_MODIFIERS = { "public",
+const std::vector< std::string > CClassUnit::ACCESS_MODIFIERS = { "public",
 "protected", "private" };
