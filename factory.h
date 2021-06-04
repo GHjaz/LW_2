@@ -31,8 +31,20 @@ public:
 
 class SharpFactory : public IFactory
 {
-
+public:
+    explicit SharpFactory() {}
+    ~SharpFactory() {}
+    std::shared_ptr<ClassUnit> createClassUnit(std::string name, ClassUnit::Flags modifier = 0, ClassUnit::Flags access_modifier = 0) {
+        return std::make_shared<SClassUnit>(name);
+    }
+    std::shared_ptr<MethodUnit> createMethodUnit(std::string name, std::string returnType, MethodUnit::Flags flags) {
+        return std::make_shared<SMethodUnit>(name, returnType, flags);
+    }
+    std::shared_ptr<PrintOperatorUnit> createPrintOperatorUnit(std::string text) {
+        return std::make_shared<SPrintOperatorUnit>(text);
+    }
 };
+
 
 class JAVAFactory : public IFactory
 {

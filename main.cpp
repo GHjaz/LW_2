@@ -3,7 +3,7 @@
 
 int main(int argc, char *argv[])
 {
-    IFactory *icd = new CPPFactory();
+    IFactory *icd = new SharpFactory();
     CodeGenerator* cd = new CodeGenerator(icd);
     std::cout << cd->generateProgram() << std::endl;
     delete icd;
