@@ -1,105 +1,113 @@
 #pragma once
 
 #include "unit.h"
+#include "methodunit.h"
 
-class ClassUnit : public Unit
-{
-public:
-    virtual void add(const std::shared_ptr< Unit > &unit, Flags flags) = 0;
-    virtual std::string compile(unsigned int level = 0) const = 0;
-protected:
-    std::string m_name;
-    using Fields = std::vector< std::shared_ptr< Unit >>;
-    std::vector< Fields > m_fields;
-};
-
-class CClassUnit : public ClassUnit
-{
+class ClassUnit : public Unit {
 public:
     enum AccessModifier {
-        PUBLIC,
-        PROTECTED,
-        PRIVATE
-    };
-    static const std::vector< std::string > ACCESS_MODIFIERS;
-public:
-
-    explicit CClassUnit(const std::string &name) : m_name(name) {
-        m_fields.resize(ACCESS_MODIFIERS.size());
-    }
-    void add(const std::shared_ptr< Unit > &unit, Flags flags) {
-        int accessModifier = PRIVATE;
-        if (flags < ACCESS_MODIFIERS.size()) {
-            accessModifier = flags;
-        }
-        m_fields[accessModifier].push_back(unit);
-    }
-    std::string compile(unsigned int level = 0) const {
-        std::string result = generateShift(level) + "class " + m_name
-                + " \n{\n";
-        for (size_t i = 0; i < ACCESS_MODIFIERS.size(); ++i) {
-            if (m_fields[i].empty()) {
-                continue;
-            }
-            result += ACCESS_MODIFIERS[i] + ":\n";
-            for (const auto &f : m_fields[i]) {
-                result += f->compile(level + 1);
-            }
-            result += "\n";
-        }
-        result += generateShift(level) + "};\n";
-        return result;
-    }
-private:
-    std::string m_name;
-    using Fields = std::vector< std::shared_ptr< Unit >>;
-    std::vector< Fields > m_fields;
-};
-
-class SClassUnit : public ClassUnit
-{
-public:
-    enum AccessModifier {
+        DEFAULT,
         PUBLIC,
         PROTECTED,
         PRIVATE,
-        INTERNAl,
-        ABSTRACT,
-        INTERFACE
+        INTERNAL,
+        PROTECTED_PRIVATE,
+        PROTECTED_INTERNAL
     };
-    static const std::vector< std::string > ACCESS_MODIFIERS;
-public:
 
-    explicit SClassUnit(const std::string &name) : m_name(name) {
-        m_fields.resize(ACCESS_MODIFIERS.size());
+    static const std::vector< std::string > ACCESS_MODIFIERS;
+
+    using Fields = std::vector< std::shared_ptr< Unit > >;
+
+public:
+    explicit ClassUnit( const std::string& name ) : m_name( name ) {
+        m_fields.resize( ACCESS_MODIFIERS.size() );
     }
-    void add(const std::shared_ptr< Unit > &unit, Flags flags) {
+
+    void add( const std::shared_ptr< Unit >& unit /* flags - больше этот параметр не нужен */) {
         int accessModifier = PRIVATE;
-        if (flags < ACCESS_MODIFIERS.size()) {
-            accessModifier = flags;
+        if( unit->getFlags() & MethodUnit::PUBLIC ) {
+            accessModifier = PUBLIC;
+        } else if( unit->getFlags() & MethodUnit::PROTECTED ) {
+            accessModifier = PROTECTED;
         }
-        m_fields[accessModifier].push_back(unit);
+
+        m_fields[ accessModifier ].push_back( unit );
     }
-    std::string compile(unsigned int level = 0) const {
-        std::string result = generateShift(level) + "class " + m_name
-                + " \n{\n";
-        for (size_t i = 0; i < ACCESS_MODIFIERS.size(); ++i) {
-            if (m_fields[i].empty()) {
+
+protected:
+    const std::string& getName() const { return m_name; }
+
+    const Fields& getFields( unsigned int accessGroup ) const {
+        if( ACCESS_MODIFIERS.size() <= accessGroup ) {
+            throw std::out_of_range( "Invalid access group index" );
+        }
+        return m_fields[ accessGroup ];
+    }
+
+private:
+    std::string m_name;
+    std::vector< Fields > m_fields;
+
+};
+
+class CppClass : public ClassUnit {
+public:
+    CppClass( const std::string& name ) : ClassUnit( name ) { }
+
+    std::string compile( unsigned int level = 0 ) const {
+        std::string result = generateShift( level ) + "class " + getName() + " {\n";
+        for( size_t i = 0; i < ACCESS_MODIFIERS.size(); ++i ) {
+            if( getFields( i ).empty() ) {
                 continue;
             }
 
-            for (const auto &f : m_fields[i]) {
-                result += generateShift(level + 1) + ACCESS_MODIFIERS[i];
-                result += f->compile(level + 1);
-                result += "\n";
+            result += ACCESS_MODIFIERS[ i ] + ":\n";
+            for( const auto& f : getFields( i ) ) {
+                result += f->compile( level + 1 );
             }
 
+            result += "\n";
         }
-        result += generateShift(level) + "};\n";
+        result += generateShift( level ) + "};\n";
+
         return result;
     }
-private:
-    std::string m_name;
-    using Fields = std::vector< std::shared_ptr< Unit >>;
-    std::vector< Fields > m_fields;
+};
+
+class JavaClass : public ClassUnit {
+public:
+    JavaClass( const std::string& name ) : ClassUnit( name ) { }
+
+    std::string compile( unsigned int level = 0 ) const {
+        std::string result = generateShift( level ) + "class " + getName() + " {\n";
+        for( size_t i = 0; i < ACCESS_MODIFIERS.size(); ++i ) {
+            for( const auto& f : getFields( i ) ) {
+                result += f->compile( level + 1 );
+                result += "\n";
+            }
+        }
+        result += generateShift( level ) + "}\n";
+
+        return result;
+    }
+};
+
+
+class SharpClass : public ClassUnit
+{
+public:
+    SharpClass( const std::string& name ) : ClassUnit( name ) { }
+    std::string compile( unsigned int level = 0 ) const {
+        std::string result = generateShift( level ) + "class " + getName() + " {\n";
+        for( size_t i = 0; i < ACCESS_MODIFIERS.size(); ++i ) {
+            for( const auto& f : getFields( i ) ) {
+                result += f->compile( level + 1 );
+                result += "\n";
+            }
+        }
+        result += generateShift( level ) + "}\n";
+
+        return result;
+    }
 };

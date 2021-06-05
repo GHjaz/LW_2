@@ -1,32 +1,40 @@
 #pragma once
 #include "unit.h"
 
-class PrintOperatorUnit : public Unit
-{
+class PrintOperatorUnit : public Unit {
 public:
+    explicit PrintOperatorUnit( const std::string& text ) : m_text( text ) { }
 
-    virtual std::string compile(unsigned int level = 0) const = 0;
+protected:
+    const std::string& getText() const { return m_text; }
 
-};
-
-class CPrintOperatorUnit : public PrintOperatorUnit
-{
-public:
-    explicit CPrintOperatorUnit(const std::string &text) : m_text(text) { }
-    std::string compile(unsigned int level = 0) const {
-        return generateShift(level) + "printf( \"" + m_text + "\" );\n";
-    }
 private:
     std::string m_text;
 };
 
-class SPrintOperatorUnit : public PrintOperatorUnit
-{
+class CppPrintOperator : public PrintOperatorUnit {
 public:
-    explicit SPrintOperatorUnit(const std::string &text) : m_text(text) { }
-    std::string compile(unsigned int level = 0) const {
-        return generateShift(level) + "Console.WriteLine( \"" + m_text + "\" );\n";
+    CppPrintOperator( const std::string& text ) : PrintOperatorUnit( text ) { }
+
+    std::string compile( unsigned int level = 0 ) const {
+        return generateShift( level ) + "printf( \"" + getText() + "\" );\n";
     }
-private:
-    std::string m_text;
+};
+
+class JavaPrintOperator : public PrintOperatorUnit {
+public:
+    JavaPrintOperator( const std::string& text ) : PrintOperatorUnit( text ) { }
+
+    std::string compile( unsigned int level = 0 ) const {
+        return generateShift( level ) + "System.out.print( \"" + getText() + "\" );\n";
+    }
+};
+
+class SharpPrintOperator : public PrintOperatorUnit {
+
+public:
+    SharpPrintOperator(const std::string& text) : PrintOperatorUnit( text ) { }
+    std::string compile(unsigned int level = 0) const {
+        return generateShift(level) + "Console.WriteLine(\"" + getText() + "\");\n";
+    }
 };

@@ -1,8 +1,11 @@
 #include "classunit.h"
 
-const std::vector< std::string > CClassUnit::ACCESS_MODIFIERS = { "public",
-"protected", "private" };
+const std::vector< std::string > ClassUnit::ACCESS_MODIFIERS = {"default",
+                                                                "public",
+                                                                "protected",
+                                                                "private",
+                                                                "internal",
+                                                                "protected_private",
+                                                                "protected_internal"};
 
-const std::vector< std::string > SClassUnit::ACCESS_MODIFIERS = { "public",
-"protected", "private", "internal" };
 

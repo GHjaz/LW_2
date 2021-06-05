@@ -9,7 +9,6 @@ CONFIG -= app_bundle
 
 SOURCES += \
         classunit.cpp \
-        codegen.cpp \
         factory.cpp \
         main.cpp \
         methodunit.cpp \
@@ -23,7 +22,6 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 HEADERS += \
     classunit.h \
-    codegen.h \
     factory.h \
     methodunit.h \
     printoperatorunit.h \
